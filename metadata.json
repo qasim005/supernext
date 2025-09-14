@@ -1,0 +1,5 @@
+{
+  "name": "SuperNext Cloud Hotspot Dashboard",
+  "description": "A client dashboard for managing Wi-Fi hotspot vouchers, real-time statistics, and splash page customization. This application provides tools for generating and tracking vouchers, viewing user activity, and customizing the hotspot login experience.",
+  "requestFramePermissions": []
+}
