@@ -14,42 +14,77 @@ const NasTestModal: React.FC<NasTestModalProps> = ({ device, onClose, onComplete
     const logContainerRef = useRef<HTMLDivElement>(null);
 
     useEffect(() => {
-        const testSteps = [
-            { message: `Starting connection test for ${device.name}...`, delay: 500 },
-            { message: `> Pinging ${device.ipAddress}...`, delay: 1000 },
-            { message: `  Ping successful. Latency: 12ms.`, delay: 500, success: true },
-            { message: `> Attempting to connect to API on port ${device.apiPort}...`, delay: 1000 },
-            { message: `  API connection established.`, delay: 500, success: true },
-            { message: `> Authenticating with username '${device.username}'...`, delay: 1000 },
-            { message: `  Authentication successful. RouterOS version 7.1.`, delay: 500, success: true },
-            { message: `\nTest complete: Connection successful.`, delay: 500, final: true, success: true },
-        ];
-        
-        const failureSteps = [
-             { message: `Starting connection test for ${device.name}...`, delay: 500 },
-            { message: `> Pinging ${device.ipAddress}...`, delay: 1000 },
-            { message: `  Ping successful. Latency: 12ms.`, delay: 500, success: true },
-            { message: `> Attempting to connect to API on port ${device.apiPort}...`, delay: 1000 },
-            { message: `  Error: Connection timed out.`, delay: 500, success: false },
-            { message: `\nTest complete: Connection failed. Please check IP, port, and firewall settings.`, delay: 500, final: true, success: false },
-        ]
-
-        // 80% chance of success for demo purposes
-        const stepsToRun = Math.random() < 0.8 ? testSteps : failureSteps;
-        let delay = 0;
-
-        stepsToRun.forEach(step => {
-            delay += step.delay;
-            setTimeout(() => {
-                setLogs(prev => [...prev, step.message]);
-                if (step.final) {
-                    setIsComplete(true);
-                    setWasSuccessful(step.success);
-                }
-            }, delay);
-        });
-
+        // Start the real connection test
+        performRealConnectionTest();
     }, [device]);
+
+    const performRealConnectionTest = async () => {
+        setLogs([`Starting connection test for ${device.name}...`]);
+        
+        try {
+            // Step 1: Connecting message
+            setTimeout(() => {
+                setLogs(prev => [...prev, `> Connecting to ${device.ipAddress}:${device.apiPort}...`]);
+            }, 500);
+
+            // Step 2: Make actual API call to backend
+            setTimeout(async () => {
+                try {
+                    const response = await fetch('http://localhost:3000/api/mikrotik/test', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                        },
+                        body: JSON.stringify({
+                            ipAddress: device.ipAddress,
+                            username: device.username,
+                            password: device.sharedSecret, // Using sharedSecret as password
+                            apiPort: device.apiPort
+                        })
+                    });
+
+                    const result = await response.json();
+
+                    if (result.success) {
+                        // Success path
+                        setLogs(prev => [...prev, 
+                            `  ✓ API connection established.`,
+                            `  ✓ Authentication successful.`,
+                            `  ✓ RouterOS version: ${result.data[0]?.version || 'N/A'}`,
+                            `  ✓ Uptime: ${result.data[0]?.uptime || 'N/A'}`,
+                            `  ✓ CPU Load: ${result.data[0]?.['cpu-load'] || 'N/A'}%`,
+                            ``,
+                            `✅ Test complete: Connection successful!`
+                        ]);
+                        setWasSuccessful(true);
+                    } else {
+                        // Failure path
+                        setLogs(prev => [...prev,
+                            `  ❌ Connection failed: ${result.error}`,
+                            ``,
+                            `❌ Test complete: Connection failed.`
+                        ]);
+                        setWasSuccessful(false);
+                    }
+                } catch (error) {
+                    // Network error
+                    setLogs(prev => [...prev,
+                        `  ❌ Network error: ${error.message}`,
+                        ``,
+                        `❌ Test complete: Connection failed.`
+                    ]);
+                    setWasSuccessful(false);
+                }
+                
+                setIsComplete(true);
+            }, 1500);
+
+        } catch (error) {
+            setLogs(prev => [...prev, `❌ Test failed: ${error.message}`]);
+            setWasSuccessful(false);
+            setIsComplete(true);
+        }
+    };
 
     useEffect(() => {
         if (logContainerRef.current) {
@@ -66,11 +101,11 @@ const NasTestModal: React.FC<NasTestModalProps> = ({ device, onClose, onComplete
     };
     
     const getLogColor = (log: string): string => {
-        if (log.includes('successful') || log.includes('established')) return 'text-green-400';
-        if (log.includes('failed') || log.includes('Error')) return 'text-red-400';
+        if (log.includes('✓') || log.includes('✅')) return 'text-green-400';
+        if (log.includes('❌') || log.includes('failed') || log.includes('Error')) return 'text-red-400';
+        if (log.includes('>')) return 'text-blue-400';
         return 'text-gray-300';
     }
-
 
     return (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-60" onClick={handleClose}>
@@ -85,7 +120,7 @@ const NasTestModal: React.FC<NasTestModalProps> = ({ device, onClose, onComplete
                     {logs.map((log, index) => (
                         <div key={index} className={`whitespace-pre-wrap ${getLogColor(log)}`}>{log}</div>
                     ))}
-                    {!isComplete && <div className="w-2 h-4 bg-gray-300 animate-pulse"></div>}
+                    {!isComplete && <div className="w-2 h-4 bg-gray-300 animate-pulse inline-block">_</div>}
                 </div>
                  <div className="p-4 border-t border-gray-700 flex justify-end">
                     <button

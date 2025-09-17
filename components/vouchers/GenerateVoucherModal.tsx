@@ -14,12 +14,21 @@ const GenerateVoucherModal: React.FC<GenerateVoucherModalProps> = ({ isOpen, onC
   const [customValidity, setCustomValidity] = useState(1);
   const [speedLimit, setSpeedLimit] = useState('5 Mbps');
   const [deviceLimit, setDeviceLimit] = useState(1);
-  const [batch, setBatch] = useState(`Batch-${new Date().toISOString().slice(0,10)}`);
+  const [batch, setBatch] = useState(`Batch-${new Date().toISOString().slice(0, 10)}`);
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    const validity = validityOption === 'custom' ? `${customValidity}d` : validityOption;
-    onGenerate({ count, validity, speedLimit, deviceLimit, batch });
+    // Convert validity to expiration date
+    let days = 7;
+    if (validityOption === 'custom') {
+      days = customValidity;
+    } else {
+      days = parseInt(validityOption.replace('d', ''));
+    }
+    const now = new Date();
+    const expirationDate = new Date(now.getTime() + days * 24 * 60 * 60 * 1000);
+    const expiration = expirationDate.toISOString().slice(0, 10); // 'YYYY-MM-DD'
+    onGenerate({ count, expiration, speedLimit, deviceLimit, batch });
     onClose();
   };
 
@@ -45,17 +54,17 @@ const GenerateVoucherModal: React.FC<GenerateVoucherModalProps> = ({ isOpen, onC
               <div>
                 <label className="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Validity</label>
                 <div className="flex flex-wrap gap-2">
-                    {['7d', '15d', '30d', 'custom'].map(val => (
-                        <button type="button" key={val} onClick={() => setValidityOption(val)} className={`px-3 py-1.5 text-sm rounded-md ${validityOption === val ? 'bg-blue-600 text-white' : 'bg-gray-200 dark:bg-gray-700'}`}>
-                            {val === '7d' ? '7 Days' : val === '15d' ? '15 Days' : val === '30d' ? '1 Month' : 'Custom'}
-                        </button>
-                    ))}
+                  {['7d', '15d', '30d', 'custom'].map(val => (
+                    <button type="button" key={val} onClick={() => setValidityOption(val)} className={`px-3 py-1.5 text-sm rounded-md ${validityOption === val ? 'bg-blue-600 text-white' : 'bg-gray-200 dark:bg-gray-700'}`}>
+                      {val === '7d' ? '7 Days' : val === '15d' ? '15 Days' : val === '30d' ? '1 Month' : 'Custom'}
+                    </button>
+                  ))}
                 </div>
-                 {validityOption === 'custom' && (
-                    <div className="mt-2">
-                        <input type="number" placeholder="Days" value={customValidity} onChange={e => setCustomValidity(parseInt(e.target.value))} min="1" className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600" required />
-                    </div>
-                 )}
+                {validityOption === 'custom' && (
+                  <div className="mt-2">
+                    <input type="number" placeholder="Days" value={customValidity} onChange={e => setCustomValidity(parseInt(e.target.value))} min="1" className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600" required />
+                  </div>
+                )}
               </div>
               <div>
                 <label htmlFor="batch" className="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Batch Name</label>
@@ -64,22 +73,22 @@ const GenerateVoucherModal: React.FC<GenerateVoucherModalProps> = ({ isOpen, onC
             </div>
             {/* Column 2 */}
             <div className="space-y-4">
-               <div>
+              <div>
                 <label htmlFor="speed-limit" className="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Speed Limit</label>
                 <select id="speed-limit" value={speedLimit} onChange={e => setSpeedLimit(e.target.value)} className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600">
-                    <option>Unlimited</option>
-                    <option>5 Mbps</option>
-                    <option>10 Mbps</option>
-                    <option>15 Mbps</option>
-                    <option>20 Mbps</option>
+                  <option>Unlimited</option>
+                  <option>5 Mbps</option>
+                  <option>10 Mbps</option>
+                  <option>15 Mbps</option>
+                  <option>20 Mbps</option>
                 </select>
               </div>
               <div>
                 <label htmlFor="device-limit" className="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Number of Devices</label>
-                 <select id="device-limit" value={deviceLimit} onChange={e => setDeviceLimit(parseInt(e.target.value))} className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600">
-                    <option value="1">1</option>
-                    <option value="5">5</option>
-                    <option value="10">10</option>
+                <select id="device-limit" value={deviceLimit} onChange={e => setDeviceLimit(parseInt(e.target.value))} className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600">
+                  <option value="1">1</option>
+                  <option value="5">5</option>
+                  <option value="10">10</option>
                 </select>
               </div>
             </div>

@@ -41,22 +41,22 @@ const Sidebar: React.FC<SidebarProps> = ({ sidebarOpen, setSidebarOpen, currentP
     return () => document.removeEventListener('keydown', keyHandler);
   });
 
-  const NavLink: React.FC<{page: Page, icon: React.ReactNode, text: string}> = ({ page, icon, text }) => {
+  const NavLink: React.FC<{ page: Page, icon: React.ReactNode, text: string }> = ({ page, icon, text }) => {
     const isActive = currentPage === page;
     const baseClasses = "group relative flex items-center gap-2.5 rounded-sm py-2 px-4 font-medium duration-300 ease-in-out w-full text-left";
     const activeClasses = "bg-blue-600 text-white";
     const inactiveClasses = "text-gray-300 hover:bg-gray-700 hover:text-white";
-    
+
     return (
-        <li>
-            <button onClick={() => setCurrentPage(page)} className={`${baseClasses} ${isActive ? activeClasses : inactiveClasses}`}>
-                {icon}
-                {text}
-            </button>
-        </li>
+      <li>
+        <button onClick={() => setCurrentPage(page)} className={`${baseClasses} ${isActive ? activeClasses : inactiveClasses}`}>
+          {icon}
+          {text}
+        </button>
+      </li>
     );
   };
-  
+
   const AdminMenu = () => (
     <>
       <NavLink page="dashboard" icon={<HomeIcon />} text="Dashboard" />
@@ -69,18 +69,19 @@ const Sidebar: React.FC<SidebarProps> = ({ sidebarOpen, setSidebarOpen, currentP
 
   const ClientMenu = () => (
     <>
-        <NavLink page="clientDashboard" icon={<HomeIcon />} text="Dashboard" />
-        <NavLink page="voucherManagement" icon={<TicketIcon />} text="Voucher Management" />
-        <NavLink page="realTimeStats" icon={<ZapIcon />} text="Real-time Stats" />
-        <NavLink page="reports" icon={<FileDownIcon />} text="Reports" />
-        <NavLink page="splashPage" icon={<PaintBrushIcon />} text="Splash Page" />
-        <NavLink page="mikrotik" icon={<RouterIcon />} text="MikroTik NAS" />
-        <NavLink page="userAccess" icon={<UsersIcon />} text="User Access" />
-        <NavLink page="accessLogs" icon={<ShieldIcon />} text="Access Logs" />
-        <NavLink page="archive" icon={<ArchiveIcon />} text="Archive" />
-        <NavLink page="settings" icon={<SettingsIcon />} text="Settings" />
-        <NavLink page="integrations" icon={<LinkIcon />} text="Integrations" />
-        <NavLink page="helpAndSupport" icon={<LifeBuoyIcon />} text="Help & Support" />
+      <NavLink page="clientDashboard" icon={<HomeIcon />} text="Dashboard" />
+      <NavLink page="voucherManagement" icon={<TicketIcon />} text="Voucher Management" />
+      <NavLink page="realTimeStats" icon={<ZapIcon />} text="Real-time Stats" />
+      <NavLink page="reports" icon={<FileDownIcon />} text="Reports" />
+      <NavLink page="splashPage" icon={<PaintBrushIcon />} text="Splash Page" />
+      <NavLink page="mikrotik" icon={<RouterIcon />} text="MikroTik NAS" />
+      <NavLink page="mikrotikAP" icon={<DatabaseIcon />} text="MikroTik AP" />
+      <NavLink page="userAccess" icon={<UsersIcon />} text="User Access" />
+      <NavLink page="accessLogs" icon={<ShieldIcon />} text="Access Logs" />
+      <NavLink page="archive" icon={<ArchiveIcon />} text="Archive" />
+      <NavLink page="settings" icon={<SettingsIcon />} text="Settings" />
+      <NavLink page="integrations" icon={<LinkIcon />} text="Integrations" />
+      <NavLink page="helpAndSupport" icon={<LifeBuoyIcon />} text="Help & Support" />
     </>
   );
 
@@ -88,14 +89,13 @@ const Sidebar: React.FC<SidebarProps> = ({ sidebarOpen, setSidebarOpen, currentP
   return (
     <aside
       ref={sidebar}
-      className={`absolute left-0 top-0 z-40 flex h-screen w-72 flex-col overflow-y-hidden bg-gray-800 text-gray-300 duration-300 ease-linear dark:bg-gray-900 lg:static lg:translate-x-0 ${
-        sidebarOpen ? 'translate-x-0' : '-translate-x-full'
-      }`}
+      className={`absolute left-0 top-0 z-40 flex h-screen w-72 flex-col overflow-y-hidden bg-gray-800 text-gray-300 duration-300 ease-linear dark:bg-gray-900 lg:static lg:translate-x-0 ${sidebarOpen ? 'translate-x-0' : '-translate-x-full'
+        }`}
     >
       <div className="flex items-center justify-between gap-2 px-6 py-5.5 lg:py-6.5">
         <a href="/" className="flex items-center gap-2">
-            <SuperNextLogo className="h-10 w-8" />
-            <span className="text-2xl font-bold text-white">SuperNext Cloud</span>
+          <SuperNextLogo className="h-10 w-8" />
+          <span className="text-2xl font-bold text-white">SuperNext Cloud</span>
         </a>
         <button
           ref={trigger}

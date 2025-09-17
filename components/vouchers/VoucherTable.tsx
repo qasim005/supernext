@@ -10,6 +10,7 @@ interface VoucherTableProps {
   onShowQrCode: (code: string) => void;
   onSort: (key: keyof Voucher) => void;
   sortConfig: { key: keyof Voucher; direction: 'ascending' | 'descending' } | null;
+  onUpdateExpiry?: (voucherCode: string, newExpiry: string) => void;
 }
 
 const statusColorMap: Record<VoucherStatus, string> = {
@@ -41,7 +42,7 @@ const SortableHeader: React.FC<{
   );
 };
 
-const VoucherTable: React.FC<VoucherTableProps> = ({ vouchers, selectedVouchers, onSelectAll, onSelectOne, onShowQrCode, onSort, sortConfig }) => {
+const VoucherTable: React.FC<VoucherTableProps> = ({ vouchers, selectedVouchers, onSelectAll, onSelectOne, onShowQrCode, onSort, sortConfig, onUpdateExpiry }) => {
   const isAllSelected = vouchers.length > 0 && selectedVouchers.length === vouchers.length;
 
   const isExpiringSoon = (voucher: Voucher): boolean => {
@@ -58,12 +59,12 @@ const VoucherTable: React.FC<VoucherTableProps> = ({ vouchers, selectedVouchers,
           <tr>
             <th scope="col" className="p-4">
               <div className="flex items-center">
-                <input 
-                    id="checkbox-all" 
-                    type="checkbox" 
-                    className="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 rounded focus:ring-blue-500 dark:focus:ring-blue-600 dark:ring-offset-gray-800 focus:ring-2 dark:bg-gray-700 dark:border-gray-600"
-                    checked={isAllSelected}
-                    onChange={(e) => onSelectAll(e.target.checked)}
+                <input
+                  id="checkbox-all"
+                  type="checkbox"
+                  className="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 rounded focus:ring-blue-500 dark:focus:ring-blue-600 dark:ring-offset-gray-800 focus:ring-2 dark:bg-gray-700 dark:border-gray-600"
+                  checked={isAllSelected}
+                  onChange={(e) => onSelectAll(e.target.checked)}
                 />
                 <label htmlFor="checkbox-all" className="sr-only">checkbox</label>
               </div>
@@ -86,7 +87,7 @@ const VoucherTable: React.FC<VoucherTableProps> = ({ vouchers, selectedVouchers,
               <tr key={voucher.id} className={`border-b dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-600 ${expiring ? 'bg-yellow-50 dark:bg-yellow-900/20' : 'bg-white dark:bg-gray-800'}`}>
                 <td className="w-4 p-4">
                   <div className="flex items-center">
-                    <input 
+                    <input
                       id={`checkbox-${voucher.id}`}
                       type="checkbox"
                       className="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 rounded focus:ring-blue-500 dark:focus:ring-blue-600 dark:ring-offset-gray-800 focus:ring-2 dark:bg-gray-700 dark:border-gray-600"
@@ -109,11 +110,22 @@ const VoucherTable: React.FC<VoucherTableProps> = ({ vouchers, selectedVouchers,
                 <td className="px-6 py-4">{voucher.speedLimit}</td>
                 <td className="px-6 py-4">{voucher.deviceLimit || 1}</td>
                 <td className="px-6 py-4">{new Date(voucher.createdAt).toLocaleDateString()}</td>
-                <td className="px-6 py-4">{new Date(voucher.expiresAt).toLocaleDateString()}</td>
                 <td className="px-6 py-4">
-                    <button onClick={() => onShowQrCode(voucher.code)} className="text-gray-500 hover:text-blue-600 dark:text-gray-400 dark:hover:text-blue-500">
-                        <QrCodeIcon className="w-5 h-5" />
-                    </button>
+                  {onUpdateExpiry ? (
+                    <input
+                      type="date"
+                      className="bg-gray-50 border border-gray-300 text-gray-900 text-xs rounded focus:ring-blue-500 focus:border-blue-500 p-1 dark:bg-gray-700 dark:border-gray-600 dark:text-white"
+                      value={voucher.expiresAt ? new Date(voucher.expiresAt).toISOString().slice(0, 10) : ''}
+                      onChange={e => onUpdateExpiry(voucher.code, e.target.value)}
+                    />
+                  ) : (
+                    new Date(voucher.expiresAt).toLocaleDateString()
+                  )}
+                </td>
+                <td className="px-6 py-4">
+                  <button onClick={() => onShowQrCode(voucher.code)} className="text-gray-500 hover:text-blue-600 dark:text-gray-400 dark:hover:text-blue-500">
+                    <QrCodeIcon className="w-5 h-5" />
+                  </button>
                 </td>
               </tr>
             )

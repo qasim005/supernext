@@ -3,11 +3,11 @@ import { Voucher, VoucherStatus } from '../types';
 import { api } from '../utils/api'; // Import the new API client
 
 export interface GenerateVoucherOptions {
-    count: number;
-    validity: string;
-    speedLimit: string;
-    deviceLimit: number;
-    batch: string;
+  count: number;
+  expiration: string;
+  speedLimit: string;
+  deviceLimit: number;
+  batch: string;
 }
 
 export const useVouchers = () => {
@@ -20,11 +20,16 @@ export const useVouchers = () => {
     setError(null);
     try {
       const data = await api.get('/vouchers');
-      // Ensure date strings from API are converted to Date objects
-      const formattedData = data.map((v: any) => ({
-        ...v,
-        createdAt: new Date(v.createdAt),
-        expiresAt: new Date(v.expiresAt),
+      // Use data.vouchers and map backend fields to frontend fields
+      const formattedData = (data.vouchers || []).map((v: any) => ({
+        id: v.id,
+        code: v.code,
+        username: v.username,
+        createdAt: new Date(v.created_at),
+        expiresAt: new Date(v.expires_at),
+        used: v.used,
+        isExpired: v.is_expired,
+        // Add other fields as needed
       }));
       setVouchers(formattedData);
     } catch (err: any) {
@@ -50,10 +55,10 @@ export const useVouchers = () => {
       pending: nonArchived.filter(v => v.status === VoucherStatus.Pending).length,
       expired: nonArchived.filter(v => v.status === VoucherStatus.Expired).length,
       suspended: nonArchived.filter(v => v.status === VoucherStatus.Suspended).length,
-      expiringSoon: nonArchived.filter(v => 
-          v.status !== VoucherStatus.Expired &&
-          v.expiresAt > now &&
-          v.expiresAt <= sevenDaysFromNow
+      expiringSoon: nonArchived.filter(v =>
+        v.status !== VoucherStatus.Expired &&
+        v.expiresAt > now &&
+        v.expiresAt <= sevenDaysFromNow
       ).length,
     };
   }, [vouchers]);
@@ -84,7 +89,7 @@ export const useVouchers = () => {
   const generateVouchers = async (options: GenerateVoucherOptions) => {
     setLoading(true);
     try {
-      await api.post('/vouchers', options);
+      await api.post('/vouchers/batch', options);
       await fetchVouchers(); // Refresh list after generating
     } catch (err: any) {
       setError(err.message || 'Failed to generate vouchers.');
@@ -112,5 +117,17 @@ export const useVouchers = () => {
   const activateVouchers = (ids: string[]) => updateVoucherStatus(ids, VoucherStatus.Active);
   const archiveVouchers = (ids: string[]) => updateVoucherStatus(ids, VoucherStatus.Archived);
 
-  return { vouchers, stats, loading, error, generateVouchers, deleteVouchers, suspendVouchers, activateVouchers, archiveVouchers };
+  const updateVoucherExpiry = async (voucherCode: string, expiration: string) => {
+    setLoading(true);
+    setError(null);
+    try {
+      await api.put(`/vouchers/${voucherCode}/expiration`, { expiration });
+      // Optionally refresh vouchers list here
+    } catch (err: any) {
+      setError(err.message || 'Failed to update voucher expiry.');
+    } finally {
+      setLoading(false);
+    }
+  };
+  return { vouchers, stats, loading, error, generateVouchers, deleteVouchers, suspendVouchers, activateVouchers, archiveVouchers, updateVoucherExpiry };
 };

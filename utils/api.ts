@@ -1,6 +1,6 @@
 // A simple API client to handle requests to your backend.
 // By using a relative path, we can leverage Vite's proxy in development.
-const API_BASE_URL = '/api';
+const API_BASE_URL = 'http://localhost:3000/api';
 
 const request = async (endpoint: string, method: 'GET' | 'POST' | 'PUT' | 'DELETE', body?: any) => {
   const headers: HeadersInit = {
