@@ -1,6 +1,7 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import { Voucher, VoucherStatus } from '../../types';
 import { QrCodeIcon } from '../icons/IconComponents';
+import { useVouchers } from '../../hooks/useVouchers';
 
 interface VoucherTableProps {
   vouchers: Voucher[];
@@ -11,6 +12,7 @@ interface VoucherTableProps {
   onSort: (key: keyof Voucher) => void;
   sortConfig: { key: keyof Voucher; direction: 'ascending' | 'descending' } | null;
   onUpdateExpiry?: (voucherCode: string, newExpiry: string) => void;
+  onDeleteVoucher?: (voucherCode: string) => void;
 }
 
 const statusColorMap: Record<VoucherStatus, string> = {
@@ -42,8 +44,9 @@ const SortableHeader: React.FC<{
   );
 };
 
-const VoucherTable: React.FC<VoucherTableProps> = ({ vouchers, selectedVouchers, onSelectAll, onSelectOne, onShowQrCode, onSort, sortConfig, onUpdateExpiry }) => {
+const VoucherTable: React.FC<VoucherTableProps> = ({ vouchers, selectedVouchers, onSelectAll, onSelectOne, onShowQrCode, onSort, sortConfig, onUpdateExpiry, onDeleteVoucher }) => {
   const isAllSelected = vouchers.length > 0 && selectedVouchers.length === vouchers.length;
+  const { deleteVouchers } = useVouchers();
 
   const isExpiringSoon = (voucher: Voucher): boolean => {
     if (voucher.status === VoucherStatus.Expired) return false;
@@ -51,6 +54,10 @@ const VoucherTable: React.FC<VoucherTableProps> = ({ vouchers, selectedVouchers,
     const sevenDaysFromNow = new Date(now.getTime() + 7 * 24 * 60 * 60 * 1000);
     return voucher.expiresAt > now && voucher.expiresAt <= sevenDaysFromNow;
   };
+
+  // useEffect(() => {
+  //   console.log(onDeleteVoucher, "onDeleteVoucher")
+  // }, [onDeleteVoucher]);
 
   return (
     <div className="overflow-x-auto">
@@ -72,7 +79,7 @@ const VoucherTable: React.FC<VoucherTableProps> = ({ vouchers, selectedVouchers,
             <SortableHeader columnKey="code" title="Voucher Code" onSort={onSort} sortConfig={sortConfig} />
             <SortableHeader columnKey="status" title="Status" onSort={onSort} sortConfig={sortConfig} />
             <SortableHeader columnKey="batch" title="Batch" onSort={onSort} sortConfig={sortConfig} />
-            <SortableHeader columnKey="validity" title="Validity" onSort={onSort} sortConfig={sortConfig} />
+            {/* <SortableHeader columnKey="validity" title="Validity" onSort={onSort} sortConfig={sortConfig} /> */}
             <SortableHeader columnKey="speedLimit" title="Speed Limit" onSort={onSort} sortConfig={sortConfig} />
             <SortableHeader columnKey="deviceLimit" title="Devices" onSort={onSort} sortConfig={sortConfig} />
             <SortableHeader columnKey="createdAt" title="Created At" onSort={onSort} sortConfig={sortConfig} />
@@ -106,7 +113,7 @@ const VoucherTable: React.FC<VoucherTableProps> = ({ vouchers, selectedVouchers,
                   </span>
                 </td>
                 <td className="px-6 py-4">{voucher.batch || 'N/A'}</td>
-                <td className="px-6 py-4">{voucher.validity}</td>
+                {/* <td className="px-6 py-4">{voucher.validity}</td> */}
                 <td className="px-6 py-4">{voucher.speedLimit}</td>
                 <td className="px-6 py-4">{voucher.deviceLimit || 1}</td>
                 <td className="px-6 py-4">{new Date(voucher.createdAt).toLocaleDateString()}</td>
@@ -122,10 +129,17 @@ const VoucherTable: React.FC<VoucherTableProps> = ({ vouchers, selectedVouchers,
                     new Date(voucher.expiresAt).toLocaleDateString()
                   )}
                 </td>
-                <td className="px-6 py-4">
+                <td className="px-6 py-4 flex gap-2">
                   <button onClick={() => onShowQrCode(voucher.code)} className="text-gray-500 hover:text-blue-600 dark:text-gray-400 dark:hover:text-blue-500">
                     <QrCodeIcon className="w-5 h-5" />
                   </button>
+
+                  <button onClick={async () => await deleteVouchers([voucher.code])} className="text-red-500 hover:text-red-700" title="Delete Voucher">
+                    <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                    </svg>
+                  </button>
+
                 </td>
               </tr>
             )

@@ -178,6 +178,14 @@ const VoucherManagement: React.FC = () => {
           onSort={requestSort}
           sortConfig={sortConfig}
           onUpdateExpiry={handleUpdateExpiry}
+          onDeleteVoucher={async (voucherCode: string) => {
+            await deleteVouchers([voucherCode]);
+            addNotification({
+              type: NotificationType.Voucher,
+              title: 'Voucher Deleted',
+              message: `Voucher ${voucherCode} deleted successfully.`
+            });
+          }}
         />
         <Pagination
           currentPage={currentPage}

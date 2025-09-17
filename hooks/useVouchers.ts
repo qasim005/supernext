@@ -29,6 +29,11 @@ export const useVouchers = () => {
         expiresAt: new Date(v.expires_at),
         used: v.used,
         isExpired: v.is_expired,
+        status: v.status,
+        deviceLimit: v.deviceLimit ?? v.device_limit ?? 1,
+        batch: v.batch,
+        speedLimit: v.speedLimit ?? v.speed_limit,
+        validity: v.validity, // Will be calculated on frontend if needed
         // Add other fields as needed
       }));
       setVouchers(formattedData);
@@ -102,8 +107,10 @@ export const useVouchers = () => {
   const deleteVouchers = async (ids: string[]) => {
     setLoading(true);
     try {
-      // Assuming a DELETE /vouchers endpoint that accepts a body with IDs
-      await api.post('/vouchers/delete', { voucherIds: ids }); // Many backends use POST for bulk delete
+      // Delete each voucher individually since backend doesn't support bulk delete
+      for (const id of ids) {
+        await api.delete(`/vouchers/${id}`);
+      }
       await fetchVouchers(); // Refresh list
     } catch (err: any) {
       setError(err.message || 'Failed to delete vouchers.');
