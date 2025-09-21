@@ -1,4 +1,5 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
+import { BrowserRouter as Router, Route, Routes } from 'react-router-dom';
 import Sidebar from './components/layout/Sidebar';
 import Header from './components/layout/Header';
 import AdminDashboard from './components/admin/AdminDashboard';
@@ -120,11 +121,11 @@ const App: React.FC = () => {
     }
   };
 
-  const handleLogin = (role: UserRole) => {
-    setUserRole(role);
-    setCurrentPage(role === 'client' ? 'clientDashboard' : 'dashboard');
-    setAppState('dashboard');
-  };
+  // const handleLogin = (role: UserRole) => {
+  //   setUserRole(role);
+  //   setCurrentPage(role === 'client' ? 'clientDashboard' : 'dashboard');
+  //   setAppState('dashboard');
+  // };
 
   const handleLogout = () => {
     setAppState('landing');
@@ -135,69 +136,83 @@ const App: React.FC = () => {
     setAppState('hotspotSimulation');
   }
 
-  const handleEndHotspotSimulation = () => {
-    setSimulationVoucherCode(null);
-    setAppState('dashboard');
-  }
+  // const handleEndHotspotSimulation = () => {
+  //   setSimulationVoucherCode(null);
+  //   setAppState('dashboard');
+  // }
 
-  if (appState === 'landing') {
-    return <LandingPage onNavigateToLogin={() => setAppState('login')} />;
-  }
+  // if (appState === 'landing') {
+  //   return <LandingPage onNavigateToLogin={() => setAppState('login')} />;
+  // }
 
-  if (appState === 'login') {
-    return <LoginPage onLogin={handleLogin} onBack={() => setAppState('landing')} />;
-  }
+  // if (appState === 'login') {
+  //   return <LoginPage onLogin={handleLogin} onBack={() => setAppState('landing')} />;
+  // }
 
-  if (appState === 'hotspotSimulation' && simulationVoucherCode) {
-    return <HotspotSimulationPage voucherCode={simulationVoucherCode} onBack={handleEndHotspotSimulation} />;
-  }
+  // if (appState === 'hotspotSimulation' && simulationVoucherCode) {
+  //   return <HotspotSimulationPage voucherCode={simulationVoucherCode} onBack={handleEndHotspotSimulation} />;
+  // }
 
+
+  useEffect(() => {
+    console.log('App mounted', currentPage);
+  }, [currentPage])
 
   return (
     <NotificationsProvider>
-      <div className="flex h-screen overflow-hidden bg-white dark:bg-gray-900">
-        <Sidebar
-          sidebarOpen={sidebarOpen}
-          setSidebarOpen={setSidebarOpen}
-          currentPage={currentPage}
-          setCurrentPage={setCurrentPage}
-          role={userRole}
-          onLogout={handleLogout}
-        />
-        <div className="relative flex flex-1 flex-col overflow-y-auto overflow-x-hidden">
-          <Header
-            sidebarOpen={sidebarOpen}
-            setSidebarOpen={setSidebarOpen}
-            title={pageTitles[currentPage].title}
-            subtitle={pageTitles[currentPage].subtitle}
-            role={userRole}
-          />
-          <main>
-            <div className="mx-auto max-w-screen-2xl p-4 md:p-6 2xl:p-10">
-              {currentPage === 'dashboard' && <AdminDashboard />}
-              {currentPage === 'vouchers' && <VoucherManagement />}
-              {currentPage === 'users' && <UserManagement />}
-              {currentPage === 'services' && <ServiceManagement />}
-              {currentPage === 'adminManagement' && <AdminManagement />}
-              {currentPage === 'clientDashboard' && (userRole === 'master-admin' ? <MasterDashboard /> : <ClientDashboard />)}
-              {currentPage === 'voucherManagement' && <ClientVoucherManagement onStartSimulation={handleStartHotspotSimulation} />}
-              {currentPage === 'reports' && <ReportsPage />}
-              {currentPage === 'backups' && <BackupPage />}
-              {currentPage === 'mikrotik' && <MikrotikPage />}
-              {currentPage === 'mikrotikAP' && <MikrotikAPPage />}
-              {currentPage === 'archive' && <ArchivePage />}
-              {currentPage === 'settings' && <SettingsPage />}
-              {currentPage === 'userAccess' && <UserAccessPage />}
-              {currentPage === 'accessLogs' && <AccessLogsPage />}
-              {currentPage === 'realTimeStats' && <RealTimeStatsPage />}
-              {currentPage === 'splashPage' && <SplashPageCustomizer />}
-              {currentPage === 'helpAndSupport' && <HelpAndSupportPage />}
-              {currentPage === 'integrations' && <IntegrationsPage />}
+      <Routes>
+        <Route path="/" element={<LandingPage onNavigateToLogin={() => setAppState('login')} />} />
+        <Route
+          path="*"
+          element={
+            <div className="flex h-screen overflow-hidden bg-white dark:bg-gray-900">
+              <Sidebar
+                sidebarOpen={sidebarOpen}
+                setSidebarOpen={setSidebarOpen}
+                currentPage={currentPage}
+                setCurrentPage={setCurrentPage}
+                role={userRole}
+                onLogout={handleLogout}
+              />
+              <div className="relative flex flex-1 flex-col overflow-y-auto overflow-x-hidden">
+                <Header
+                  sidebarOpen={sidebarOpen}
+                  setSidebarOpen={setSidebarOpen}
+                  title={pageTitles[currentPage].title}
+                  subtitle={pageTitles[currentPage].subtitle}
+                  role={userRole}
+                />
+                <main>
+                  <div className="mx-auto max-w-screen-2xl p-4 md:p-6 2xl:p-10">
+                    <Routes>
+                      <Route path="/admindashboard" element={<AdminDashboard />} />
+                      <Route path="/vouchers" element={<VoucherManagement />} />
+                      <Route path="/users" element={<UserManagement />} />
+                      <Route path="/services" element={<ServiceManagement />} />
+                      <Route path="/admin-management" element={<AdminManagement />} />
+                      <Route path="/client-dashboard" element={userRole === 'master-admin' ? <MasterDashboard /> : <ClientDashboard />} />
+                      <Route path="/voucher-management" element={<ClientVoucherManagement onStartSimulation={handleStartHotspotSimulation} />} />
+                      <Route path="/reports" element={<ReportsPage />} />
+                      <Route path="/backups" element={<BackupPage />} />
+                      <Route path="/mikrotik" element={<MikrotikPage />} />
+                      <Route path="/mikrotik-ap" element={<MikrotikAPPage />} />
+                      <Route path="/archive" element={<ArchivePage />} />
+                      <Route path="/settings" element={<SettingsPage />} />
+                      <Route path="/user-access" element={<UserAccessPage />} />
+                      <Route path="/access-logs" element={<AccessLogsPage />} />
+                      <Route path="/real-time-stats" element={<RealTimeStatsPage />} />
+                      <Route path="/splash-page" element={<SplashPageCustomizer />} />
+                      <Route path="/help-and-support" element={<HelpAndSupportPage />} />
+                      <Route path="/integrations" element={<IntegrationsPage />} />
+                    </Routes>
+                  </div>
+                </main>
+                <AICopilot setCurrentPage={setCurrentPage} role={userRole} currentPage={currentPage} />
+              </div>
             </div>
-          </main>
-          <AICopilot setCurrentPage={setCurrentPage} role={userRole} currentPage={currentPage} />
-        </div>
-      </div>
+          }
+        />
+      </Routes>
     </NotificationsProvider>
   );
 };

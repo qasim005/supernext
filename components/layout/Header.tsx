@@ -3,6 +3,7 @@ import { MenuIcon, BellIcon, SuperNextLogo } from '../icons/IconComponents';
 import { UserRole } from '../../App';
 import { useNotificationsContext } from '../../context/NotificationsContext';
 import { NotificationsPanel } from './NotificationsPanel';
+import { useNavigate } from 'react-router-dom';
 
 
 interface HeaderProps {
@@ -17,6 +18,7 @@ const Header: React.FC<HeaderProps> = ({ sidebarOpen, setSidebarOpen, title, sub
   const { unreadCount } = useNotificationsContext();
   const [showNotifications, setShowNotifications] = useState(false);
   const notificationRef = useRef<HTMLDivElement>(null);
+  const navigate = useNavigate()
 
   // Close notifications panel on click outside
   useEffect(() => {
@@ -31,7 +33,7 @@ const Header: React.FC<HeaderProps> = ({ sidebarOpen, setSidebarOpen, title, sub
     document.addEventListener('click', clickHandler);
     return () => document.removeEventListener('click', clickHandler);
   });
-  
+
   return (
     <header className="sticky top-0 z-30 flex w-full bg-white dark:bg-gray-800 drop-shadow-sm">
       <div className="flex flex-grow items-center justify-between px-4 py-4 shadow-sm md:px-6 2xl:px-11">
@@ -49,23 +51,23 @@ const Header: React.FC<HeaderProps> = ({ sidebarOpen, setSidebarOpen, title, sub
           <div className="flex items-center gap-2">
             <SuperNextLogo className="h-8 w-6" />
             <h1 className="text-lg font-semibold text-gray-800 dark:text-gray-200">
-                SuperNext Cloud
+              SuperNext Cloud
             </h1>
           </div>
         </div>
-        
+
         <div className="hidden lg:block">
-            <h1 className="text-xl font-semibold text-gray-800 dark:text-gray-200">{title}</h1>
-            <p className="text-sm text-gray-500 dark:text-gray-400">{subtitle}</p>
+          <h1 className="text-xl font-semibold text-gray-800 dark:text-gray-200">{title}</h1>
+          <p className="text-sm text-gray-500 dark:text-gray-400">{subtitle}</p>
         </div>
 
         <div className="flex items-center gap-4">
-           <div ref={notificationRef} className="relative">
+          <div ref={notificationRef} className="relative">
             <button
               onClick={() => setShowNotifications(!showNotifications)}
               className="relative flex h-8 w-8 items-center justify-center rounded-full border border-gray-200 bg-gray-100 hover:bg-gray-200 dark:border-gray-700 dark:bg-gray-800 dark:hover:bg-gray-700"
             >
-              <BellIcon className="h-5 w-5 text-gray-600 dark:text-gray-300"/>
+              <BellIcon className="h-5 w-5 text-gray-600 dark:text-gray-300" />
               {unreadCount > 0 && (
                 <span className="absolute -top-1 -right-1 flex h-4 w-4 items-center justify-center rounded-full bg-red-500 text-xs font-bold text-white">
                   {unreadCount > 9 ? '9+' : unreadCount}
