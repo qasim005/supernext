@@ -1,4 +1,5 @@
 import React, { useEffect, useRef } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { HomeIcon, TicketIcon, UsersIcon, LogoutIcon, FileDownIcon, DatabaseIcon, RouterIcon, ArchiveIcon, SettingsIcon, ShieldIcon, ZapIcon, PaintBrushIcon, ServerIcon, ShieldAlertIcon, SuperNextLogo, LifeBuoyIcon, LinkIcon } from '../icons/IconComponents';
 import { Page, UserRole } from '../../App';
 
@@ -12,6 +13,7 @@ interface SidebarProps {
 }
 
 const Sidebar: React.FC<SidebarProps> = ({ sidebarOpen, setSidebarOpen, currentPage, setCurrentPage, role, onLogout }) => {
+  const navigate = useNavigate();
   const trigger = useRef<any>(null);
   const sidebar = useRef<any>(null);
 
@@ -41,15 +43,43 @@ const Sidebar: React.FC<SidebarProps> = ({ sidebarOpen, setSidebarOpen, currentP
     return () => document.removeEventListener('keydown', keyHandler);
   });
 
+  // Map page to route path
+  const pageToRoute: Record<Page, string> = {
+    dashboard: '/supernext/dashboard',
+    vouchers: '/supernext/voucher-management',
+    users: '/supernext/clients',
+    services: '/supernext/services',
+    adminManagement: '/supernext/admin-management',
+  clientDashboard: '/client/dashboard',
+  voucherManagement: '/client/voucher-management',
+  reports: '/client/reports',
+  backups: '/client/backups',
+  mikrotik: '/client/mikrotik',
+  mikrotikAP: '/client/mikrotik-ap',
+  archive: '/client/archive',
+  settings: '/client/settings',
+  userAccess: '/client/user-access',
+  accessLogs: '/client/access-logs',
+  realTimeStats: '/client/real-time-stats',
+  splashPage: '/client/splash-page',
+  helpAndSupport: '/client/help-and-support',
+  integrations: '/client/integrations',
+  };
+
   const NavLink: React.FC<{ page: Page, icon: React.ReactNode, text: string }> = ({ page, icon, text }) => {
     const isActive = currentPage === page;
     const baseClasses = "group relative flex items-center gap-2.5 rounded-sm py-2 px-4 font-medium duration-300 ease-in-out w-full text-left";
     const activeClasses = "bg-blue-600 text-white";
     const inactiveClasses = "text-gray-300 hover:bg-gray-700 hover:text-white";
 
+    const handleClick = () => {
+      setCurrentPage(page);
+      navigate(pageToRoute[page]);
+    };
+
     return (
       <li>
-        <button onClick={() => setCurrentPage(page)} className={`${baseClasses} ${isActive ? activeClasses : inactiveClasses}`}>
+        <button onClick={handleClick} className={`${baseClasses} ${isActive ? activeClasses : inactiveClasses}`}>
           {icon}
           {text}
         </button>
@@ -85,6 +115,10 @@ const Sidebar: React.FC<SidebarProps> = ({ sidebarOpen, setSidebarOpen, currentP
     </>
   );
 
+
+  useEffect(() => {
+ console.log('Sidebar role changed:', role);
+  }, [role]);
 
   return (
     <aside

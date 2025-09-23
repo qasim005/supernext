@@ -1,20 +1,32 @@
 import React, { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { GoogleIcon, SuperNextLogo } from '../icons/IconComponents';
 import { UserRole } from '../../App';
 
 interface LoginPageProps {
   onLogin: (role: UserRole) => void;
   onBack: () => void;
+  setUserRole: (role: UserRole) => void;
 }
 
-const LoginPage: React.FC<LoginPageProps> = ({ onLogin, onBack }) => {
+const LoginPage: React.FC<LoginPageProps> = ({ onLogin, onBack, setUserRole }) => {
   const [isSignup, setIsSignup] = useState(false);
+  const navigate = useNavigate();
+
+  const handleLogin = (role: UserRole) => {
+    console.log(`Logging in as ${role}`);
+    setUserRole(role);
+    onLogin(role);
+    if (role === 'client') {
+      navigate('/client/dashboard');
+    } else {
+      navigate('/supernext/dashboard');
+    }
+  };
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    // In a real app, you'd handle login/signup logic here.
-    // For this demo, we'll just log in as a client.
-    onLogin('client');
+    handleLogin('client');
   };
 
   return (
@@ -65,7 +77,7 @@ const LoginPage: React.FC<LoginPageProps> = ({ onLogin, onBack }) => {
         ) : (
           // Login Form
           <>
-            <form className="space-y-4" onSubmit={(e) => { e.preventDefault(); onLogin('client'); }}>
+            <form className="space-y-4" onSubmit={(e) => { e.preventDefault(); handleLogin('client'); }}>
               <div>
                 <label htmlFor="email-login" className="sr-only">Email address</label>
                 <input id="email-login" name="email" type="email" autoComplete="email" defaultValue="client@example.com" required className="w-full px-3 py-2 placeholder-gray-500 border border-gray-300 rounded-md focus:outline-none focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:text-white" placeholder="Email address" />
@@ -82,16 +94,10 @@ const LoginPage: React.FC<LoginPageProps> = ({ onLogin, onBack }) => {
               </button>
             </form>
             
-            <div className="relative flex py-2 items-center">
-                <div className="flex-grow border-t border-gray-300 dark:border-gray-600"></div>
-                <span className="flex-shrink mx-4 text-xs text-gray-500 dark:text-gray-400 uppercase">Demo Login</span>
-                <div className="flex-grow border-t border-gray-300 dark:border-gray-600"></div>
-            </div>
-
+       
              <div className="grid grid-cols-1 sm:grid-cols-3 gap-2">
-                <button onClick={() => onLogin('client')} className="w-full text-white bg-green-600 hover:bg-green-700 font-medium rounded-lg text-xs px-4 py-2 text-center">Client</button>
-                <button onClick={() => onLogin('admin')} className="w-full text-white bg-indigo-600 hover:bg-indigo-700 font-medium rounded-lg text-xs px-4 py-2 text-center">Admin</button>
-                <button onClick={() => onLogin('master-admin')} className="w-full text-white bg-purple-600 hover:bg-purple-700 font-medium rounded-lg text-xs px-4 py-2 text-center">Master</button>
+                <button onClick={() => handleLogin('client')} className="w-full text-white bg-green-600 hover:bg-green-700 font-medium rounded-lg text-xs px-4 py-2 text-center">Client</button>
+                <button onClick={() => handleLogin('admin')} className="w-full text-white bg-indigo-600 hover:bg-indigo-700 font-medium rounded-lg text-xs px-4 py-2 text-center">Admin</button>
             </div>
 
 

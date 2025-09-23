@@ -27,6 +27,8 @@ import HelpAndSupportPage from './components/client/help/HelpAndSupportPage';
 import IntegrationsPage from './components/client/settings/IntegrationsPage';
 import AICopilot from './components/layout/AICopilot';
 import HotspotSimulationPage from './components/client/HotspotSimulationPage';
+import NotFoundPage from './components/NotFoundPage';
+import SignUpPage from './components/auth/SignUpPage';
 
 export type Page =
   'dashboard' | 'vouchers' | 'users' | 'clientDashboard' | 'voucherManagement' |
@@ -39,7 +41,7 @@ const App: React.FC = () => {
   const [appState, setAppState] = useState<'landing' | 'login' | 'dashboard' | 'hotspotSimulation'>('landing');
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [currentPage, setCurrentPage] = useState<Page>('dashboard');
-  const [userRole, setUserRole] = useState<UserRole>('admin');
+  const [userRole, setUserRole] = useState<UserRole>('client');
   const [simulationVoucherCode, setSimulationVoucherCode] = useState<string | null>(null);
 
   const pageTitles: Record<Page, { title: string, subtitle: string }> = {
@@ -121,12 +123,6 @@ const App: React.FC = () => {
     }
   };
 
-  // const handleLogin = (role: UserRole) => {
-  //   setUserRole(role);
-  //   setCurrentPage(role === 'client' ? 'clientDashboard' : 'dashboard');
-  //   setAppState('dashboard');
-  // };
-
   const handleLogout = () => {
     setAppState('landing');
   };
@@ -136,27 +132,7 @@ const App: React.FC = () => {
     setAppState('hotspotSimulation');
   }
 
-  // const handleEndHotspotSimulation = () => {
-  //   setSimulationVoucherCode(null);
-  //   setAppState('dashboard');
-  // }
 
-  // if (appState === 'landing') {
-  //   return <LandingPage onNavigateToLogin={() => setAppState('login')} />;
-  // }
-
-  // if (appState === 'login') {
-  //   return <LoginPage onLogin={handleLogin} onBack={() => setAppState('landing')} />;
-  // }
-
-  // if (appState === 'hotspotSimulation' && simulationVoucherCode) {
-  //   return <HotspotSimulationPage voucherCode={simulationVoucherCode} onBack={handleEndHotspotSimulation} />;
-  // }
-
-
-  useEffect(() => {
-    console.log('App mounted', currentPage);
-  }, [currentPage])
 
   return (
     <NotificationsProvider>
@@ -185,25 +161,25 @@ const App: React.FC = () => {
                 <main>
                   <div className="mx-auto max-w-screen-2xl p-4 md:p-6 2xl:p-10">
                     <Routes>
-                      <Route path="/admindashboard" element={<AdminDashboard />} />
-                      <Route path="/vouchers" element={<VoucherManagement />} />
-                      <Route path="/users" element={<UserManagement />} />
-                      <Route path="/services" element={<ServiceManagement />} />
-                      <Route path="/admin-management" element={<AdminManagement />} />
-                      <Route path="/client-dashboard" element={userRole === 'master-admin' ? <MasterDashboard /> : <ClientDashboard />} />
-                      <Route path="/voucher-management" element={<ClientVoucherManagement onStartSimulation={handleStartHotspotSimulation} />} />
-                      <Route path="/reports" element={<ReportsPage />} />
-                      <Route path="/backups" element={<BackupPage />} />
-                      <Route path="/mikrotik" element={<MikrotikPage />} />
-                      <Route path="/mikrotik-ap" element={<MikrotikAPPage />} />
-                      <Route path="/archive" element={<ArchivePage />} />
-                      <Route path="/settings" element={<SettingsPage />} />
-                      <Route path="/user-access" element={<UserAccessPage />} />
-                      <Route path="/access-logs" element={<AccessLogsPage />} />
-                      <Route path="/real-time-stats" element={<RealTimeStatsPage />} />
-                      <Route path="/splash-page" element={<SplashPageCustomizer />} />
-                      <Route path="/help-and-support" element={<HelpAndSupportPage />} />
-                      <Route path="/integrations" element={<IntegrationsPage />} />
+                      <Route path="/supernext/dashboard" element={<AdminDashboard />} />
+                      <Route path="/supernext/voucher-management" element={<VoucherManagement />} />
+                      <Route path="/supernext/clients" element={<UserManagement />} />
+                      <Route path="/supernext/services" element={<ServiceManagement />} />
+                      <Route path="/supernext/admin-management" element={<AdminManagement />} />
+                      <Route path="/client/dashboard" element={userRole === 'master-admin' ? <MasterDashboard /> : <ClientDashboard />} />
+                      <Route path="/client/voucher-management" element={<ClientVoucherManagement onStartSimulation={handleStartHotspotSimulation} />} />
+                      <Route path="/client/reports" element={<ReportsPage />} />
+                      <Route path="/client/backups" element={<BackupPage />} />
+                      <Route path="/client/mikrotik" element={<MikrotikPage />} />
+                      <Route path="/client/mikrotik-ap" element={<MikrotikAPPage />} />
+                      <Route path="/client/archive" element={<ArchivePage />} />
+                      <Route path="/client/settings" element={<SettingsPage />} />
+                      <Route path="/client/user-access" element={<UserAccessPage />} />
+                      <Route path="/client/access-logs" element={<AccessLogsPage />} />
+                      <Route path="/client/real-time-stats" element={<RealTimeStatsPage />} />
+                      <Route path="/client/splash-page" element={<SplashPageCustomizer />} />
+                      <Route path="/client/help-and-support" element={<HelpAndSupportPage />} />
+                      <Route path="/client/integrations" element={<IntegrationsPage />} />
                     </Routes>
                   </div>
                 </main>
@@ -212,6 +188,9 @@ const App: React.FC = () => {
             </div>
           }
         />
+        <Route path="/signin" element={<LoginPage setUserRole={setUserRole} onLogin={() => {}} onBack={() => {}} />} />
+        <Route path="/signup" element={<SignUpPage />} />
+        <Route path="*" element={<NotFoundPage />} />
       </Routes>
     </NotificationsProvider>
   );
