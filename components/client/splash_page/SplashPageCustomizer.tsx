@@ -1,8 +1,11 @@
-import React from 'react';
+import React, { useRef, useEffect } from 'react';
 import { useSplashPageSettings } from '../../../hooks/useSplashPageSettings';
 import { SplashPageSettings } from '../../../types';
 import { GoogleIcon, TicketIcon, UploadCloudIcon, WifiIcon, BitcoinIcon, CreditCardIcon, FacebookIcon, InstagramIcon, TikTokIcon, PhoneIcon } from '../../icons/IconComponents';
 import ChatbotWidget from './ChatbotWidget';
+import axiosInstance from '../../../utils/axiosInstance';
+
+const DEBOUNCE_DELAY = 2000; // 2 seconds
 
 const SplashPagePreview: React.FC<{ settings: SplashPageSettings }> = ({ settings }) => {
     const backgroundStyle: React.CSSProperties = settings.backgroundType === 'image'
@@ -12,7 +15,7 @@ const SplashPagePreview: React.FC<{ settings: SplashPageSettings }> = ({ setting
     return (
         <div className="relative w-full h-full rounded-lg overflow-hidden shadow-lg flex items-center justify-center bg-cover bg-center" style={backgroundStyle}>
             <div className="bg-black bg-opacity-40 p-8 rounded-lg w-full max-w-sm text-center" style={{ color: settings.textColor }}>
-                {settings.logoUrl && <img src={settings.logoUrl} alt="Logo" className="h-12 mx-auto mb-6" />}
+                {settings.logoUrl && <img src={`${import.meta.env.VITE_BASE_URL || 'http://localhost:3000'}${settings.logoUrl}`} alt="Logo" className="h-12 mx-auto mb-6" />}
                 <h1 className="text-3xl font-bold">{settings.welcomeTitle}</h1>
                 <p className="mt-2 text-sm opacity-90">{settings.welcomeMessage}</p>
 
@@ -98,6 +101,36 @@ const ToggleSwitch: React.FC<{label: string, enabled: boolean, onChange: (enable
 
 const SplashPageCustomizer: React.FC = () => {
     const { settings, updateSettings, updateLoginOption } = useSplashPageSettings();
+    const debounceTimer = useRef<NodeJS.Timeout | null>(null);
+
+    // Logo upload handler
+    const handleLogoUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+        console.log('Uploading logo...');
+        if (!e.target.files || e.target.files.length === 0) return;
+        const formData = new FormData();
+        formData.append('logo', e.target.files[0]);
+        try {
+            const res = await axiosInstance.post('/api/splash-settings/upload-logo', formData, {
+                headers: { 'Content-Type': 'multipart/form-data' }
+            });
+            updateSettings({ logoUrl: res.data.url });
+        } catch (err) {
+            alert('Logo upload failed');
+        }
+    };
+
+    // Debounced auto-save effect
+    useEffect(() => {
+        if (debounceTimer.current) clearTimeout(debounceTimer.current);
+        debounceTimer.current = setTimeout(() => {
+            axiosInstance.post('/api/splash-settings', settings).catch(() => {
+                // Optionally show error
+            });
+        }, DEBOUNCE_DELAY);
+        return () => {
+            if (debounceTimer.current) clearTimeout(debounceTimer.current);
+        };
+    }, [settings]);
 
     const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>, field: 'logoUrl' | 'backgroundImageUrl') => {
         if (e.target.files && e.target.files[0]) {
@@ -114,8 +147,9 @@ const SplashPageCustomizer: React.FC = () => {
                     <div>
                         <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">Company Logo</label>
                         <div className="mt-2 flex items-center gap-4">
-                            <img src={settings.logoUrl} alt="logo" className="h-12 w-12 p-2 bg-gray-600 rounded-md object-contain"/>
-                            <input type="file" id="logo-upload" onChange={e => handleFileChange(e, 'logoUrl')} className="hidden"/>
+                            
+                            <img src={`${import.meta.env.REACT_APP_BACKEND_URL || 'http://localhost:3000'}${settings.logoUrl}`} alt="logo" className="h-12 w-12 p-2 bg-gray-600 rounded-md object-contain"/>
+                            <input type="file" id="logo-upload" onChange={handleLogoUpload} className="hidden"/>
                             <label htmlFor="logo-upload" className="cursor-pointer text-sm text-blue-600 dark:text-blue-400 hover:underline">Change logo</label>
                         </div>
                     </div>

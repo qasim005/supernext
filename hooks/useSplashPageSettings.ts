@@ -1,4 +1,4 @@
-import { useState, useCallback } from 'react';
+import { useState, useCallback, useEffect } from 'react';
 import { SplashPageSettings } from '../types';
 
 const createDefaultSettings = (): SplashPageSettings => ({
@@ -28,7 +28,20 @@ const createDefaultSettings = (): SplashPageSettings => ({
 });
 
 export const useSplashPageSettings = () => {
-  const [settings, setSettings] = useState<SplashPageSettings>(createDefaultSettings);
+  const [settings, setSettings] = useState<SplashPageSettings>(createDefaultSettings());
+
+  // Fetch initial settings from backend on mount
+  useEffect(() => {
+    (async () => {
+      try {
+        const axios = (await import('../utils/axiosInstance')).default;
+        const res = await axios.get('/api/splash-settings');
+        if (res.data) setSettings((prev) => ({ ...prev, ...res.data }));
+      } catch (err) {
+        // Optionally show error
+      }
+    })();
+  }, []);
 
   const updateSettings = useCallback((newSettings: Partial<SplashPageSettings>) => {
     setSettings(prev => ({ ...prev, ...newSettings }));
