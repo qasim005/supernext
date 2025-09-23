@@ -30,7 +30,7 @@ const NasTestModal: React.FC<NasTestModalProps> = ({ device, onClose, onComplete
             // Step 2: Make actual API call to backend
             setTimeout(async () => {
                 try {
-                    const response = await fetch('http://localhost:3000/api/mikrotik/test', {
+                    const response = await fetch(`${import.meta.env.VITE_BASE_URL}/api/mikrotik/test`, {
                         method: 'POST',
                         headers: {
                             'Content-Type': 'application/json',

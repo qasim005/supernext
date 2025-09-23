@@ -10,8 +10,7 @@ import ReportsPage from './components/client/ReportsPage';
 import ClientVoucherManagement from './components/client/ClientVoucherManagement';
 import LandingPage from './components/landing/LandingPage';
 import BackupPage from './components/client/BackupPage';
-import MikrotikPage from './components/client/MikrotikPage';
-import MikrotikAPPage from './components/client/MikrotikAPPage';
+import MikrotikPage from './components/client/MikrotikPage.jsx';
 import ArchivePage from './components/client/ArchivePage';
 import SettingsPage from './components/client/settings/SettingsPage';
 import UserAccessPage from './components/client/user_access/UserAccessPage';
@@ -171,7 +170,6 @@ const App: React.FC = () => {
                       <Route path="/client/reports" element={<ReportsPage />} />
                       <Route path="/client/backups" element={<BackupPage />} />
                       <Route path="/client/mikrotik" element={<MikrotikPage />} />
-                      <Route path="/client/mikrotik-ap" element={<MikrotikAPPage />} />
                       <Route path="/client/archive" element={<ArchivePage />} />
                       <Route path="/client/settings" element={<SettingsPage />} />
                       <Route path="/client/user-access" element={<UserAccessPage />} />

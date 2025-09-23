@@ -105,7 +105,6 @@ const Sidebar: React.FC<SidebarProps> = ({ sidebarOpen, setSidebarOpen, currentP
       <NavLink page="reports" icon={<FileDownIcon />} text="Reports" />
       <NavLink page="splashPage" icon={<PaintBrushIcon />} text="Splash Page" />
       <NavLink page="mikrotik" icon={<RouterIcon />} text="MikroTik NAS" />
-      <NavLink page="mikrotikAP" icon={<DatabaseIcon />} text="MikroTik AP" />
       <NavLink page="userAccess" icon={<UsersIcon />} text="User Access" />
       <NavLink page="accessLogs" icon={<ShieldIcon />} text="Access Logs" />
       <NavLink page="archive" icon={<ArchiveIcon />} text="Archive" />

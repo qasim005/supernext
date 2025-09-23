@@ -38,7 +38,7 @@ const APConfigModal: React.FC<APConfigModalProps> = ({ apId, apName, onClose }) 
     const fetchConfigData = async () => {
         try {
             setLoading(true);
-            const response = await fetch(`http://localhost:3000/api/mikrotik/aps/${apId}/config`);
+            const response = await fetch(`${import.meta.env.VITE_BASE_URL}/api/mikrotik/aps/${apId}/config`);
             if (!response.ok) {
                 throw new Error('Failed to fetch configuration data');
             }
@@ -54,7 +54,7 @@ const APConfigModal: React.FC<APConfigModalProps> = ({ apId, apName, onClose }) 
     const handleDownloadLoginHTML = async () => {
         try {
             setDownloadingHTML(true);
-            const response = await fetch(`http://localhost:3000/api/mikrotik/aps/${apId}/login-html`);
+            const response = await fetch(`${import.meta.env.VITE_BASE_URL}/api/mikrotik/aps/${apId}/login-html`);
             if (!response.ok) {
                 throw new Error('Failed to fetch login HTML');
             }
