@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from 'react';
+import axiosInstance from './utils/axiosInstance';
 import { BrowserRouter as Router, Route, Routes } from 'react-router-dom';
 import Sidebar from './components/layout/Sidebar';
 import Header from './components/layout/Header';
@@ -10,6 +11,7 @@ import ReportsPage from './components/client/ReportsPage';
 import ClientVoucherManagement from './components/client/ClientVoucherManagement';
 import LandingPage from './components/landing/LandingPage';
 import BackupPage from './components/client/BackupPage';
+// @ts-ignore
 import MikrotikPage from './components/client/MikrotikPage.jsx';
 import ArchivePage from './components/client/ArchivePage';
 import SettingsPage from './components/client/settings/SettingsPage';
@@ -28,6 +30,8 @@ import AICopilot from './components/layout/AICopilot';
 import HotspotSimulationPage from './components/client/HotspotSimulationPage';
 import NotFoundPage from './components/NotFoundPage';
 import SignUpPage from './components/auth/SignUpPage';
+import ProtectedRoute from './components/auth/ProtectedRoute';
+import UnauthorizedPage from './components/UnauthorizedPage';
 
 export type Page =
   'dashboard' | 'vouchers' | 'users' | 'clientDashboard' | 'voucherManagement' |
@@ -122,8 +126,15 @@ const App: React.FC = () => {
     }
   };
 
-  const handleLogout = () => {
+  const handleLogout = async () => {
+    // Remove token from storage
+    localStorage.removeItem('token');
+    try {
+  await axiosInstance.post('/api/auth/logout');
+    } catch (e) {}
+    setUserRole('client'); // or set to a default role, or add a 'null' type to UserRole if you want to fully clear
     setAppState('landing');
+    window.location.href = '/signin';
   };
 
   const handleStartHotspotSimulation = (voucherCode: string) => {
@@ -160,24 +171,96 @@ const App: React.FC = () => {
                 <main>
                   <div className="mx-auto max-w-screen-2xl p-4 md:p-6 2xl:p-10">
                     <Routes>
-                      <Route path="/supernext/dashboard" element={<AdminDashboard />} />
-                      <Route path="/supernext/voucher-management" element={<VoucherManagement />} />
-                      <Route path="/supernext/clients" element={<UserManagement />} />
-                      <Route path="/supernext/services" element={<ServiceManagement />} />
-                      <Route path="/supernext/admin-management" element={<AdminManagement />} />
-                      <Route path="/client/dashboard" element={userRole === 'master-admin' ? <MasterDashboard /> : <ClientDashboard />} />
-                      <Route path="/client/voucher-management" element={<ClientVoucherManagement onStartSimulation={handleStartHotspotSimulation} />} />
-                      <Route path="/client/reports" element={<ReportsPage />} />
-                      <Route path="/client/backups" element={<BackupPage />} />
-                      <Route path="/client/mikrotik" element={<MikrotikPage />} />
-                      <Route path="/client/archive" element={<ArchivePage />} />
-                      <Route path="/client/settings" element={<SettingsPage />} />
-                      <Route path="/client/user-access" element={<UserAccessPage />} />
-                      <Route path="/client/access-logs" element={<AccessLogsPage />} />
-                      <Route path="/client/real-time-stats" element={<RealTimeStatsPage />} />
-                      <Route path="/client/splash-page" element={<SplashPageCustomizer />} />
-                      <Route path="/client/help-and-support" element={<HelpAndSupportPage />} />
-                      <Route path="/client/integrations" element={<IntegrationsPage />} />
+                      <Route path="/supernext/dashboard" element={
+                        <ProtectedRoute requiredRole="admin">
+                          <AdminDashboard />
+                        </ProtectedRoute>
+                      } />
+                      <Route path="/supernext/voucher-management" element={
+                        <ProtectedRoute requiredRole="admin">
+                          <VoucherManagement />
+                        </ProtectedRoute>
+                      } />
+                      <Route path="/supernext/clients" element={
+                        <ProtectedRoute requiredRole="admin">
+                          <UserManagement />
+                        </ProtectedRoute>
+                      } />
+                      <Route path="/supernext/services" element={
+                        <ProtectedRoute requiredRole="admin">
+                          <ServiceManagement />
+                        </ProtectedRoute>
+                      } />
+                      <Route path="/supernext/admin-management" element={
+                        <ProtectedRoute requiredRole="admin">
+                          <AdminManagement />
+                        </ProtectedRoute>
+                      } />
+                      <Route path="/client/dashboard" element={
+                        <ProtectedRoute>
+                          {userRole === 'master-admin' ? <MasterDashboard /> : <ClientDashboard />}
+                        </ProtectedRoute>
+                      } />
+                      <Route path="/client/voucher-management" element={
+                        <ProtectedRoute>
+                          <ClientVoucherManagement onStartSimulation={handleStartHotspotSimulation} />
+                        </ProtectedRoute>
+                      } />
+                      <Route path="/client/reports" element={
+                        <ProtectedRoute>
+                          <ReportsPage />
+                        </ProtectedRoute>
+                      } />
+                      <Route path="/client/backups" element={
+                        <ProtectedRoute>
+                          <BackupPage />
+                        </ProtectedRoute>
+                      } />
+                      <Route path="/client/mikrotik" element={
+                        <ProtectedRoute>
+                          <MikrotikPage />
+                        </ProtectedRoute>
+                      } />
+                      <Route path="/client/archive" element={
+                        <ProtectedRoute>
+                          <ArchivePage />
+                        </ProtectedRoute>
+                      } />
+                      <Route path="/client/settings" element={
+                        <ProtectedRoute>
+                          <SettingsPage />
+                        </ProtectedRoute>
+                      } />
+                      <Route path="/client/user-access" element={
+                        <ProtectedRoute>
+                          <UserAccessPage />
+                        </ProtectedRoute>
+                      } />
+                      <Route path="/client/access-logs" element={
+                        <ProtectedRoute>
+                          <AccessLogsPage />
+                        </ProtectedRoute>
+                      } />
+                      <Route path="/client/real-time-stats" element={
+                        <ProtectedRoute>
+                          <RealTimeStatsPage />
+                        </ProtectedRoute>
+                      } />
+                      <Route path="/client/splash-page" element={
+                        <ProtectedRoute>
+                          <SplashPageCustomizer />
+                        </ProtectedRoute>
+                      } />
+                      <Route path="/client/help-and-support" element={
+                        <ProtectedRoute>
+                          <HelpAndSupportPage />
+                        </ProtectedRoute>
+                      } />
+                      <Route path="/client/integrations" element={
+                        <ProtectedRoute>
+                          <IntegrationsPage />
+                        </ProtectedRoute>
+                      } />
                     </Routes>
                   </div>
                 </main>
@@ -188,6 +271,7 @@ const App: React.FC = () => {
         />
         <Route path="/signin" element={<LoginPage setUserRole={setUserRole} onLogin={() => {}} onBack={() => {}} />} />
         <Route path="/signup" element={<SignUpPage />} />
+        <Route path="/unauthorized" element={<UnauthorizedPage />} />
         <Route path="*" element={<NotFoundPage />} />
       </Routes>
     </NotificationsProvider>

@@ -8,8 +8,9 @@ import axiosInstance from '../../../utils/axiosInstance';
 const DEBOUNCE_DELAY = 2000; // 2 seconds
 
 const SplashPagePreview: React.FC<{ settings: SplashPageSettings }> = ({ settings }) => {
+    const baseUrl = import.meta.env.VITE_BASE_URL || 'http://localhost:3000';
     const backgroundStyle: React.CSSProperties = settings.backgroundType === 'image'
-        ? { backgroundImage: `url(${settings.backgroundImageUrl})` }
+        ? { backgroundImage: `url(${baseUrl}${settings.backgroundImageUrl})` }
         : { backgroundColor: settings.backgroundColor };
     
     return (
@@ -132,10 +133,21 @@ const SplashPageCustomizer: React.FC = () => {
         };
     }, [settings]);
 
-    const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>, field: 'logoUrl' | 'backgroundImageUrl') => {
+    const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>, field: 'logoUrl' | 'backgroundImageUrl') => {
         if (e.target.files && e.target.files[0]) {
-            const fileUrl = URL.createObjectURL(e.target.files[0]);
-            updateSettings({ [field]: fileUrl });
+            const formData = new FormData();
+            formData.append(field === 'backgroundImageUrl' ? 'background' : 'logo', e.target.files[0]);
+            try {
+                const endpoint = field === 'backgroundImageUrl'
+                    ? '/api/splash-settings/upload-background'
+                    : '/api/splash-settings/upload-logo';
+                const res = await axiosInstance.post(endpoint, formData, {
+                    headers: { 'Content-Type': 'multipart/form-data' }
+                });
+                updateSettings({ [field]: res.data.url });
+            } catch (err) {
+                alert('Image upload failed');
+            }
         }
     };
 
@@ -173,9 +185,19 @@ const SplashPageCustomizer: React.FC = () => {
                          {settings.backgroundType === 'image' ? (
                               <div className="mt-2">
                                 <label htmlFor="bg-upload" className="relative cursor-pointer w-full h-24 rounded-lg border-2 border-dashed border-gray-300 dark:border-gray-600 flex flex-col justify-center items-center text-gray-500 hover:bg-gray-50 dark:hover:bg-gray-700/50">
-                                   <UploadCloudIcon className="w-6 h-6"/>
-                                   <span className="text-xs mt-1">Click to upload background</span>
-                                   <input type="file" id="bg-upload" onChange={e => handleFileChange(e, 'backgroundImageUrl')} className="hidden"/>
+                                   {settings.backgroundImageUrl ? (
+                                       <img
+                                           src={`${import.meta.env.VITE_BASE_URL || 'http://localhost:3000'}${settings.backgroundImageUrl}`}
+                                           alt="Background Preview"
+                                           className="absolute inset-0 w-full h-full object-cover rounded-lg z-0"
+                                           style={{ opacity: 0.7 }}
+                                           onClick={() => document.getElementById('bg-upload')?.click()}
+                                       />
+                                   ) : (
+                                       <UploadCloudIcon className="w-6 h-6 z-10" />
+                                   )}
+                                   <span className="text-xs mt-1 z-10">{settings.backgroundImageUrl ? 'Click image to update' : 'Click to upload background'}</span>
+                                   <input type="file" id="bg-upload" onChange={e => handleFileChange(e, 'backgroundImageUrl')} className="hidden" />
                                 </label>
                               </div>
                          ) : (

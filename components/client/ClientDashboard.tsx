@@ -2,6 +2,7 @@ import React from 'react';
 import { useVouchers } from '../../hooks/useVouchers';
 import StatCard from '../dashboard/StatCard';
 import { TicketIcon, UsersIcon, AlertTriangleIcon, PauseIcon } from '../icons/IconComponents';
+import TestProtectedComponent from './TestProtectedComponent';
 
 const ClientDashboard: React.FC = () => {
     const { stats } = useVouchers();
@@ -22,6 +23,9 @@ const ClientDashboard: React.FC = () => {
                     <span className="font-semibold text-blue-600 dark:text-blue-400">Voucher Management</span> tab.
                 </p>
             </div>
+            
+            {/* Test Protected Component - Remove this after testing */}
+            <TestProtectedComponent />
         </div>
     );
 };
